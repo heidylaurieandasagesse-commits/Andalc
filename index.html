@@ -1,84 +1,59 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANDALC - Calculatrice</title>
-</head>
 
-<body>
-    <h1>ANDALC 🧮</h1>
-    <p>Ma première calculatrice</p>
+<script>
+    function calculer() {
+        let valeur1 = document.getElementById("nombre1").value;
+        let valeur2 = document.getElementById("nombre2").value;
+        let operation = document.getElementById("operation").value;
 
-    <input type="number" id="nombre1" placeholder="Premier nombre">
+        if (valeur1 === "") {
+            document.getElementById("resultat").textContent =
+                "Entre le premier nombre !";
+            return;
+        }
 
-    <select id="operation">
-        <option value="+">Addition (+)</option>
-        <option value="-">Soustraction (-)</option>
-        <option value="*">Multiplication (×)</option>
-        <option value="/">Division (÷)</option>
-        <option value="puissance">Puissance (xʸ)</option>
-<option value="racine">Racine carrée (√)</option>
-        <option value="pourcentage">Pourcentage (%)</option>
-    </select>
+        if (operation !== "racine" && valeur2 === "") {
+            document.getElementById("resultat").textContent =
+                "Entre le deuxième nombre !";
+            return;
+        }
 
-    <input type="number" id="nombre2" placeholder="Deuxième nombre">
+        let nombre1 = Number(valeur1);
+        let nombre2 = Number(valeur2);
+        let resultat;
 
-    <button onclick="calculer()">Calculer</button>
+        if (operation === "+") {
+            resultat = nombre1 + nombre2;
 
-    <h2 id="resultat">Résultat :</h2>
+        } else if (operation === "-") {
+            resultat = nombre1 - nombre2;
 
-    <script>
-        function calculer() {
-            let valeur1 = document.getElementById("nombre1").value;
-            let valeur2 = document.getElementById("nombre2").value;
-            let operation = document.getElementById("operation").value;
+        } else if (operation === "*") {
+            resultat = nombre1 * nombre2;
 
-            if (valeur1 === "" || valeur2 === "") {
+        } else if (operation === "/") {
+            if (nombre2 === 0) {
                 document.getElementById("resultat").textContent =
-                    "Entre les deux nombres !";
+                    "Erreur : division par zéro !";
                 return;
             }
+            resultat = nombre1 / nombre2;
 
-            let nombre1 = Number(valeur1);
-            let nombre2 = Number(valeur2);
-            let resultat;
+        } else if (operation === "puissance") {
+            resultat = nombre1 ** nombre2;
 
-            if (operation === "+") {
-                resultat = nombre1 + nombre2;
-            } else if (operation === "-") {
-                resultat = nombre1 - nombre2;
-            } else if (operation === "*") {
-                resultat = nombre1 * nombre2;
-            } else if (operation === "/") {
-                if (nombre2 === 0) {
-                    document.getElementById("resultat").textContent =
-                        "Erreur : division par zéro !";
-                    return;
-                }
-                resultat = nombre1 / nombre2;
-            } else if (operation === "puissance") {
-                resultat = nombre1 ** nombre2;
-            } else if (operation === "racine") {
-                if (nombre1 < 0) {
-                    document.getElementById("resultat").textContent =
-                        "Erreur : racine carrée d'un nombre négatif !";
-                    return;
-                }
-                                resultat = Math.sqrt(nombre1);
+        } else if (operation === "racine") {
+            if (nombre1 < 0) {
+                document.getElementById("resultat").textContent =
+                    "Erreur : racine carrée d'un nombre négatif !";
+                return;
             }
+            resultat = Math.sqrt(nombre1);
 
-        document.getElementById("resultat").textContent = "Résultat : " + resultat; } 
-        
-            } else if (operation === "pourcentage") {
-                resultat = (nombre1 / 100) * nombre2;
-            }
-
-            document.getElementById("resultat").textContent =
-                "Résultat : " + resultat;
+        } else if (operation === "pourcentage") {
+            resultat = (nombre1 / 100) * nombre2;
         }
-    </script>
 
-    </script>
-</body>
-</html>
+        document.getElementById("resultat").textContent =
+            "Résultat : " + resultat;
+    }
+</script>
