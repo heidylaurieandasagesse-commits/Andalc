@@ -69,6 +69,16 @@
             }
 
         document.getElementById("resultat").textContent = "Résultat : " + resultat; } 
+        
+            } else if (operation === "pourcentage") {
+                resultat = (nombre1 / 100) * nombre2;
+            }
+
+            document.getElementById("resultat").textContent =
+                "Résultat : " + resultat;
+        }
+    </script>
+
     </script>
 </body>
 </html>
