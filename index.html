@@ -57,7 +57,16 @@
                 }
                 resultat = nombre1 / nombre2;
             }
-
+            } else if (operation === "puissance") {
+                resultat = nombre1 ** nombre2;
+            } else if (operation === "racine") {
+                if (nombre1 < 0) {
+                    document.getElementById("resultat").textContent =
+                        "Erreur : racine carrée d'un nombre négatif !";
+                    return;
+                }
+                resultat = Math.sqrt(nombre1);
+        }
             document.getElementById("resultat").textContent =
                 "Résultat : " + resultat;
         }
