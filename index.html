@@ -1,1 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANDALC - Calculatrice</title>
+</head>
 
+<body>
+    <h1>ANDALC 🧮</h1>
+    <p>Ma première calculatrice</p>
+
+    <input type="number" id="nombre1" placeholder="Premier nombre">
+
+    <select id="operation">
+        <option value="+">Addition (+)</option>
+        <option value="-">Soustraction (-)</option>
+        <option value="*">Multiplication (×)</option>
+        <option value="/">Division (÷)</option>
+    </select>
+
+    <input type="number" id="nombre2" placeholder="Deuxième nombre">
+
+    <button onclick="calculer()">Calculer</button>
+
+    <h2 id="resultat">Résultat :</h2>
+
+    <script>
+        function calculer() {
+            let valeur1 = document.getElementById("nombre1").value;
+            let valeur2 = document.getElementById("nombre2").value;
+            let operation = document.getElementById("operation").value;
+
+            if (valeur1 === "" || valeur2 === "") {
+                document.getElementById("resultat").textContent =
+                    "Entre les deux nombres !";
+                return;
+            }
+
+            let nombre1 = Number(valeur1);
+            let nombre2 = Number(valeur2);
+            let resultat;
+
+            if (operation === "+") {
+                resultat = nombre1 + nombre2;
+            } else if (operation === "-") {
+                resultat = nombre1 - nombre2;
+            } else if (operation === "*") {
+                resultat = nombre1 * nombre2;
+            } else if (operation === "/") {
+                if (nombre2 === 0) {
+                    document.getElementById("resultat").textContent =
+                        "Erreur : division par zéro !";
+                    return;
+                }
+                resultat = nombre1 / nombre2;
+            }
+
+            document.getElementById("resultat").textContent =
+                "Résultat : " + resultat;
+        }
+    </script>
+</body>
+</html>
