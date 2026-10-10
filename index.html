@@ -1,59 +1,555 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANDALC Scientific</title>
+</head>
+<body>
 
-<script>
-    function calculer() {
-        let valeur1 = document.getElementById("nombre1").value;
-        let valeur2 = document.getElementById("nombre2").value;
-        let operation = document.getElementById("operation").value;
+    <h1>ANDALC Scientific 🧮</h1>
+    <p>Calculatrice scientifique — Version 1.0</p>
 
-        if (valeur1 === "") {
-            document.getElementById("resultat").textContent =
-                "Entre le premier nombre !";
-            return;
+    <label for="angleMode">Mode des angles :</label>
+    <select id="angleMode">
+        <option value="DEG">Degrés (DEG)</option>
+        <option value="RAD">Radians (RAD)</option>
+    </select>
+
+    <h3>Expression mathématique</h3>
+    <input id="expression" type="text"
+        placeholder="Exemple : 2*(3+4)^2"
+        autocomplete="off" style="width:90%;">
+
+    <p>
+        <button onclick="insertText('(')">(</button>
+        <button onclick="insertText(')')">)</button>
+        <button onclick="insertText('pi')">π</button>
+        <button onclick="insertText('e')">e</button>
+        <button onclick="insertText('^')">xʸ</button>
+        <button onclick="insertText('!')">n!</button>
+        <button onclick="insertText('%')">%</button>
+        <button onclick="backspace()">⌫</button>
+        <button onclick="clearAll()">AC</button>
+    </p>
+
+    <p>
+        <button onclick="insertText('7')">7</button>
+        <button onclick="insertText('8')">8</button>
+        <button onclick="insertText('9')">9</button>
+        <button onclick="insertText('/')">÷</button>
+    </p>
+    <p>
+        <button onclick="insertText('4')">4</button>
+        <button onclick="insertText('5')">5</button>
+        <button onclick="insertText('6')">6</button>
+        <button onclick="insertText('*')">×</button>
+    </p>
+    <p>
+        <button onclick="insertText('1')">1</button>
+        <button onclick="insertText('2')">2</button>
+        <button onclick="insertText('3')">3</button>
+        <button onclick="insertText('-')">−</button>
+    </p>
+    <p>
+        <button onclick="insertText('0')">0</button>
+        <button onclick="insertText('.')">.</button>
+        <button onclick="insertText('Ans')">Ans</button>
+        <button onclick="insertText('+')">+</button>
+    </p>
+
+    <h3>Fonctions scientifiques</h3>
+    <p>
+        <button onclick="insertText('sqrt(')">√</button>
+        <button onclick="insertText('abs(')">abs</button>
+        <button onclick="insertText('sin(')">sin</button>
+        <button onclick="insertText('cos(')">cos</button>
+        <button onclick="insertText('tan(')">tan</button>
+    </p>
+    <p>
+        <button onclick="insertText('asin(')">sin⁻¹</button>
+        <button onclick="insertText('acos(')">cos⁻¹</button>
+        <button onclick="insertText('atan(')">tan⁻¹</button>
+        <button onclick="insertText('ln(')">ln</button>
+        <button onclick="insertText('log(')">log</button>
+    </p>
+    <p>
+        <button onclick="insertText('exp(')">exp</button>
+        <button onclick="insertText('floor(')">floor</button>
+        <button onclick="insertText('ceil(')">ceil</button>
+        <button onclick="insertText('round(')">round</button>
+        <button onclick="insertText('mod(')">mod</button>
+    </p>
+
+    <p>
+        <button onclick="insertText('(')">Ouvrir une parenthèse</button>
+        <button onclick="insertText(',')">Séparateur de fonction</button>
+    </p>
+
+    <p>
+        <button onclick="calculate()">= Calculer</button>
+    </p>
+
+    <h2 id="result">Résultat : —</h2>
+    <p id="error" role="alert"></p>
+
+    <hr>
+
+    <h3>Mémoire de calcul</h3>
+    <p>Mémoire actuelle : <strong id="memoryDisplay">0</strong></p>
+    <button onclick="memoryClear()">MC</button>
+    <button onclick="memoryRecall()">MR</button>
+    <button onclick="memoryAdd()">M+</button>
+    <button onclick="memorySubtract()">M−</button>
+
+    <hr>
+
+    <h3>Historique</h3>
+    <button onclick="clearHistory()">Effacer l'historique</button>
+    <ol id="history"></ol>
+
+    <script>
+        "use strict";
+
+        const expressionInput = document.getElementById("expression");
+        const resultDisplay = document.getElementById("result");
+        const errorDisplay = document.getElementById("error");
+        const historyDisplay = document.getElementById("history");
+        const memoryDisplay = document.getElementById("memoryDisplay");
+        const angleMode = document.getElementById("angleMode");
+
+        let lastAnswer = 0;
+        let memory = 0;
+        let history = [];
+
+        function insertText(text) {
+            const input = expressionInput;
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+
+            input.setRangeText(text, start, end, "end");
+            input.focus();
         }
 
-        if (operation !== "racine" && valeur2 === "") {
-            document.getElementById("resultat").textContent =
-                "Entre le deuxième nombre !";
-            return;
+        function backspace() {
+            const input = expressionInput;
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+
+            if (start !== end) {
+                input.setRangeText("", start, end, "end");
+            } else if (start > 0) {
+                input.setRangeText("", start - 1, start, "end");
+            }
+
+            input.focus();
         }
 
-        let nombre1 = Number(valeur1);
-        let nombre2 = Number(valeur2);
-        let resultat;
+        function clearAll() {
+            expressionInput.value = "";
+            resultDisplay.textContent = "Résultat : —";
+            errorDisplay.textContent = "";
+            expressionInput.focus();
+        }
 
-        if (operation === "+") {
-            resultat = nombre1 + nombre2;
+        // Transforme le texte en jetons mathématiques.
+        // Aucun eval() ni Function() n'est utilisé.
+        function tokenize(source) {
+            const tokens = [];
+            let i = 0;
 
-        } else if (operation === "-") {
-            resultat = nombre1 - nombre2;
+            while (i < source.length) {
+                const ch = source[i];
 
-        } else if (operation === "*") {
-            resultat = nombre1 * nombre2;
+                if (/\s/.test(ch)) {
+                    i++;
+                    continue;
+                }
 
-        } else if (operation === "/") {
-            if (nombre2 === 0) {
-                document.getElementById("resultat").textContent =
-                    "Erreur : division par zéro !";
+                const rest = source.slice(i);
+
+                const numberMatch = rest.match(
+                    /^(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?/i
+                );
+
+                if (numberMatch) {
+                    tokens.push({
+                        type: "number",
+                        value: Number(numberMatch[0])
+                    });
+                    i += numberMatch[0].length;
+                    continue;
+                }
+
+                const identifierMatch = rest.match(/^[a-zA-Z]+/);
+
+                if (identifierMatch) {
+                    tokens.push({
+                        type: "identifier",
+                        value: identifierMatch[0].toLowerCase()
+                    });
+                    i += identifierMatch[0].length;
+                    continue;
+                }
+
+                if ("+-*/^()%!,".includes(ch)) {
+                    tokens.push({ type: ch, value: ch });
+                    i++;
+                    continue;
+                }
+
+                throw new Error("Caractère non reconnu : " + ch);
+            }
+
+            tokens.push({ type: "EOF", value: "" });
+            return tokens;
+        }
+
+        function factorial(n) {
+            if (!Number.isInteger(n) || n < 0) {
+                throw new Error(
+                    "La factorielle demande un entier positif ou nul."
+                );
+            }
+
+            if (n > 170) {
+                throw new Error("Nombre trop grand pour la factorielle.");
+            }
+
+            let result = 1;
+
+            for (let i = 2; i <= n; i++) {
+                result *= i;
+            }
+
+            return result;
+        }
+
+        function evaluateExpression(source) {
+            const tokens = tokenize(source);
+            let position = 0;
+
+            function peek() {
+                return tokens[position];
+            }
+
+            function take(type) {
+                if (peek().type !== type) {
+                    throw new Error("Expression incorrecte près de « " +
+                        peek().value + " ».");
+                }
+
+                return tokens[position++];
+            }
+
+            function angleInput(x) {
+                return angleMode.value === "DEG"
+                    ? x * Math.PI / 180
+                    : x;
+            }
+
+            function angleOutput(x) {
+                return angleMode.value === "DEG"
+                    ? x * 180 / Math.PI
+                    : x;
+            }
+
+            function callFunction(name, args) {
+                if (name === "mod") {
+                    if (args.length !== 2) {
+                        throw new Error("mod(a,b) demande deux nombres.");
+                    }
+
+                    if (args[1] === 0) {
+                        throw new Error("Modulo par zéro impossible.");
+                    }
+
+                    return args[0] % args[1];
+                }
+
+                if (args.length !== 1) {
+                    throw new Error(name + "() demande un seul nombre.");
+                }
+
+                const x = args[0];
+                let value;
+
+                switch (name) {
+                    case "sqrt":
+                        if (x < 0) {
+                            throw new Error("Racine carrée négative impossible dans les réels.");
+                        }
+                        value = Math.sqrt(x);
+                        break;
+
+                    case "abs": value = Math.abs(x); break;
+                    case "sin": value = Math.sin(angleInput(x)); break;
+                    case "cos": value = Math.cos(angleInput(x)); break;
+                    case "tan":
+                        if (Math.abs(Math.cos(angleInput(x))) < 1e-12) {
+                            throw new Error("Tangente non définie pour cet angle.");
+                        }
+                        value = Math.tan(angleInput(x));
+                        break;
+
+                    case "asin":
+                        if (x < -1 || x > 1) {
+                            throw new Error("asin accepte les valeurs de -1 à 1.");
+                        }
+                        value = angleOutput(Math.asin(x));
+                        break;
+
+                    case "acos":
+                        if (x < -1 || x > 1) {
+                            throw new Error("acos accepte les valeurs de -1 à 1.");
+                        }
+                        value = angleOutput(Math.acos(x));
+                        break;
+
+                    case "atan": value = angleOutput(Math.atan(x)); break;
+                    case "ln":
+                        if (x <= 0) throw new Error("ln demande un nombre positif.");
+                        value = Math.log(x);
+                        break;
+
+                    case "log":
+                        if (x <= 0) throw new Error("log demande un nombre positif.");
+                        value = Math.log10(x);
+                        break;
+
+                    case "exp": value = Math.exp(x); break;
+                    case "floor": value = Math.floor(x); break;
+                    case "ceil": value = Math.ceil(x); break;
+                    case "round": value = Math.round(x); break;
+
+                    default:
+                        throw new Error("Fonction inconnue : " + name);
+                }
+
+                return value;
+            }
+
+            function primary() {
+                if (peek().type === "number") {
+                    return take("number").value;
+                }
+
+                if (peek().type === "(") {
+                    take("(");
+                    const value = expression();
+                    take(")");
+                    return value;
+                }
+
+                if (peek().type === "identifier") {
+                    const name = take("identifier").value;
+
+                    if (name === "pi") return Math.PI;
+                    if (name === "e") return Math.E;
+                    if (name === "ans") return lastAnswer;
+
+                    take("(");
+                    const args = [];
+
+                    if (peek().type !== ")") {
+                        args.push(expression());
+
+                        while (peek().type === ",") {
+                            take(",");
+                            args.push(expression());
+                        }
+                    }
+
+                    take(")");
+                    return callFunction(name, args);
+                }
+
+                throw new Error("Nombre ou fonction attendu.");
+            }
+
+            function power() {
+                let value = primary();
+
+                if (peek().type === "^") {
+                    take("^");
+                    value = value ** unary();
+                }
+
+                return value;
+            }
+
+            function postfix() {
+                let value = power();
+
+                while (peek().type === "!" || peek().type === "%") {
+                    if (peek().type === "!") {
+                        take("!");
+                        value = factorial(value);
+                    } else {
+                        take("%");
+                        value = value / 100;
+                    }
+                }
+
+                return value;
+            }
+
+            function unary() {
+                if (peek().type === "+") {
+                    take("+");
+                    return unary();
+                }
+
+                if (peek().type === "-") {
+                    take("-");
+                    return -unary();
+                }
+
+                return postfix();
+            }
+
+            function term() {
+                let value = unary();
+
+                while (peek().type === "*" || peek().type === "/") {
+                    const operator = tokens[position++].type;
+                    const right = unary();
+
+                    if (operator === "/") {
+                        if (right === 0) {
+                            throw new Error("Division par zéro impossible.");
+                        }
+                        value /= right;
+                    } else {
+                        value *= right;
+                    }
+                }
+
+                return value;
+            }
+
+            function expression() {
+                let value = term();
+
+                while (peek().type === "+" || peek().type === "-") {
+                    const operator = tokens[position++].type;
+                    const right = term();
+
+                    if (operator === "+") {
+                        value += right;
+                    } else {
+                        value -= right;
+                    }
+                }
+
+                return value;
+            }
+
+            if (tokens.length > 500) {
+                throw new Error("Expression trop longue.");
+            }
+
+            const result = expression();
+
+            if (peek().type !== "EOF") {
+                throw new Error("Vérifie les opérateurs et les parenthèses.");
+            }
+
+            if (!Number.isFinite(result)) {
+                throw new Error("Le résultat n'est pas un nombre fini.");
+            }
+
+            return result;
+        }
+
+        function calculate() {
+            const source = expressionInput.value.trim();
+
+            errorDisplay.textContent = "";
+
+            if (!source) {
+                errorDisplay.textContent = "Entre une expression à calculer.";
                 return;
             }
-            resultat = nombre1 / nombre2;
 
-        } else if (operation === "puissance") {
-            resultat = nombre1 ** nombre2;
+            try {
+                const result = evaluateExpression(source);
+                lastAnswer = result;
 
-        } else if (operation === "racine") {
-            if (nombre1 < 0) {
-                document.getElementById("resultat").textContent =
-                    "Erreur : racine carrée d'un nombre négatif !";
-                return;
+                resultDisplay.textContent = "Résultat : " + result;
+                history.unshift({ expression: source, result: result });
+                history = history.slice(0, 50);
+                showHistory();
+
+            } catch (error) {
+                errorDisplay.textContent = error.message;
             }
-            resultat = Math.sqrt(nombre1);
-
-        } else if (operation === "pourcentage") {
-            resultat = (nombre1 / 100) * nombre2;
         }
 
-        document.getElementById("resultat").textContent =
-            "Résultat : " + resultat;
-    }
-</script>
+        function showHistory() {
+            historyDisplay.replaceChildren();
+
+            history.forEach(function (item) {
+                const li = document.createElement("li");
+                const button = document.createElement("button");
+
+                button.textContent = item.expression + " = " + item.result;
+                button.addEventListener("click", function () {
+                    expressionInput.value = item.expression;
+                    expressionInput.focus();
+                });
+
+                li.appendChild(button);
+                historyDisplay.appendChild(li);
+            });
+        }
+
+        function clearHistory() {
+            history = [];
+            showHistory();
+        }
+
+        function updateMemoryDisplay() {
+            memoryDisplay.textContent = String(memory);
+        }
+
+        function memoryClear() {
+            memory = 0;
+            updateMemoryDisplay();
+        }
+
+        function memoryRecall() {
+            insertText(String(memory));
+        }
+
+        function memoryAdd() {
+            try {
+                memory += evaluateExpression(expressionInput.value);
+                updateMemoryDisplay();
+                errorDisplay.textContent = "";
+            } catch (error) {
+                errorDisplay.textContent =
+                    "Calcule d'abord une expression valide pour utiliser M+.";
+            }
+        }
+
+        function memorySubtract() {
+            try {
+                memory -= evaluateExpression(expressionInput.value);
+                updateMemoryDisplay();
+                errorDisplay.textContent = "";
+            } catch (error) {
+                errorDisplay.textContent =
+                    "Calcule d'abord une expression valide pour utiliser M−.";
+            }
+        }
+
+        expressionInput.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                calculate();
+            }
+        });
+    </script>
+
+</body>
+</html>
