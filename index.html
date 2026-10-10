@@ -59,16 +59,17 @@
                 resultat = nombre1 / nombre2;
             } else if (operation === "puissance") {
                 resultat = nombre1 ** nombre2;
-            } else if (operation === "racine") {
-                if (nombre1 < 0) {
-                    document.getElementById("resultat").textContent =
-                        "Erreur : racine carrée d'un nombre négatif !";
-                    return;
-                }
-                                resultat = Math.sqrt(nombre1);
-            }
+ } else if (operation === "racine") {
+    if (nombre1 < 0) {
+        document.getElementById("resultat").textContent =
+            "Erreur : racine carrée d'un nombre négatif !";
+        return;
+    }
+    resultat = Math.sqrt(nombre1);
 
-            document.getElementById("resultat").textContent =
+} else if (operation === "pourcentage") {
+    resultat = (nombre1 / 100) * nombre2;
+            }
     </script>
 </body>
 </html>
